@@ -962,6 +962,7 @@ OWPSessionRequest(
         }
         else{
             rsaddr = I2AddrSAddr(cntrl->local_addr,&saddrlen);
+            fprintf(stderr, "DEBUG: receiver NULL, using local_addr for receiver\n");
             if( !(receiver = I2AddrBySAddr(OWPContextErrHandle(cntrl->ctx),
                             rsaddr,saddrlen,SOCK_DGRAM,IPPROTO_UDP))){
                 goto error;
@@ -985,6 +986,7 @@ OWPSessionRequest(
         }
         else{
             ssaddr = I2AddrSAddr(cntrl->local_addr,&saddrlen);
+            fprintf(stderr, "DEBUG: sender NULL, using local_addr for sender\n");
             if( !(sender = I2AddrBySAddr(OWPContextErrHandle(cntrl->ctx),
                             ssaddr,saddrlen,SOCK_DGRAM,IPPROTO_UDP))){
                 goto error;

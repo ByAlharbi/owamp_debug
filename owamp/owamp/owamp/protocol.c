@@ -43,6 +43,7 @@
 
 #include <owampP.h>
 #include <I2util/util.h>
+#include <arpa/inet.h>
 
 /*
  *         ServerGreeting message format:
@@ -699,12 +700,14 @@ _OWPEncodeTestRequestPreamble(
         case 4:
         /* sender address and port  */
         saddr4 = (struct sockaddr_in*)sender;
+        fprintf(stderr, "DEBUG: sender IP on wire: %s\n", inet_ntoa(saddr4->sin_addr));
         *(uint32_t*)&buf[16] = zero_addr ? 0 : saddr4->sin_addr.s_addr;
         *(uint16_t*)&buf[12] = saddr4->sin_port;
         memset(&buf[20],0,12);
 
         /* receiver address and port  */
         saddr4 = (struct sockaddr_in*)receiver;
+        fprintf(stderr, "DEBUG: receiver IP on wire: %s\n", inet_ntoa(saddr4->sin_addr));
         *(uint32_t*)&buf[32] = zero_addr ? 0 : saddr4->sin_addr.s_addr;
         *(uint16_t*)&buf[14] = saddr4->sin_port;
         memset(&buf[36],0,12);

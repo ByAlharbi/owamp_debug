@@ -3,9 +3,6 @@
 /* "name of sysconfdir under prefix" */
 #undef AUTOCONF_SYSCONFDIR
 
-/* Define to 1 if you have the `adjtimex' function. */
-#undef HAVE_ADJTIMEX
-
 /* Define to 1 if you have the `bind' function. */
 #undef HAVE_BIND
 
@@ -51,6 +48,9 @@
    to 0 otherwise. */
 #undef HAVE_MALLOC
 
+/* Define to 1 if you have the <memory.h> header file. */
+#undef HAVE_MEMORY_H
+
 /* Define to 1 if you have the `memset' function. */
 #undef HAVE_MEMSET
 
@@ -60,17 +60,11 @@
 /* Define to 1 if you have the <netdb.h> header file. */
 #undef HAVE_NETDB_H
 
-/* Define to 1 if you have the `ntp_adjtime' function. */
-#undef HAVE_NTP_ADJTIME
-
 /* Define to 1 if you have the `socket' function. */
 #undef HAVE_SOCKET
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
-
-/* Define to 1 if you have the <stdio.h> header file. */
-#undef HAVE_STDIO_H
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
@@ -147,14 +141,16 @@
 /* The size of `void *', as computed by sizeof. */
 #undef SIZEOF_VOID_P
 
-/* Define to 1 if all of the C90 standard headers exist (not just the ones
-   required in a freestanding environment). This macro is provided for
-   backward compatibility; new code need not use it. */
+/* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 
-/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. This
-   macro is obsolete. */
+/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #undef TIME_WITH_SYS_TIME
+
+/* Enable large inode numbers on Mac OS X 10.5.  */
+#ifndef _DARWIN_USE_64_BIT_INODE
+# define _DARWIN_USE_64_BIT_INODE 1
+#endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #undef _FILE_OFFSET_BITS
