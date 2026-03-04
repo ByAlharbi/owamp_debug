@@ -864,6 +864,8 @@ _OWPDecodeTestRequestPreamble(
             saddr4->sin_port = 0;
         else
             saddr4->sin_port = *(uint16_t*)&buf[12];
+        fprintf(stderr, "DEBUG [decode]: sender IP received: %s, port: %d, server_conf_sender: %d\n",
+                inet_ntoa(saddr4->sin_addr), ntohs(saddr4->sin_port), *server_conf_sender);
 
         /* receiver address and port  */
         saddr4 = (struct sockaddr_in*)receiver;
@@ -873,6 +875,8 @@ _OWPDecodeTestRequestPreamble(
             saddr4->sin_port = 0;
         else
             saddr4->sin_port = *(uint16_t*)&buf[14];
+        fprintf(stderr, "DEBUG [decode]: receiver IP received: %s, port: %d, server_conf_receiver: %d\n",
+                inet_ntoa(saddr4->sin_addr), ntohs(saddr4->sin_port), *server_conf_receiver);
 
         break;
         default:
@@ -1474,6 +1478,16 @@ _OWPReadTestRequest(
      */
     cntrl->state &= ~_OWPStateTestRequest;
     cntrl->state |= _OWPStateTestRequestSlots;
+
+    /* DEBUG: log final sender/receiver addresses as seen by server */
+    if(addrlen == sizeof(struct sockaddr_in)){
+        struct sockaddr_in *s4 = (struct sockaddr_in*)&sendaddr_rec;
+        struct sockaddr_in *r4 = (struct sockaddr_in*)&recvaddr_rec;
+        fprintf(stderr, "DEBUG [server]: final sender addr: %s:%d\n",
+                inet_ntoa(s4->sin_addr), ntohs(s4->sin_port));
+        fprintf(stderr, "DEBUG [server]: final receiver addr: %s:%d\n",
+                inet_ntoa(r4->sin_addr), ntohs(r4->sin_port));
+    }
 
     /*
      * Prepare the address buffers.

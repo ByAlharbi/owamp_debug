@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <assert.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
@@ -419,6 +420,13 @@ _OWPEndpointInit(
         return False;
     }
 
+    fprintf(stderr, "DEBUG [endpoint]: _OWPEndpointInit called with localaddr=%s (this is the address we will try to bind)\n", localnode);
+    if(saddr->sa_family == AF_INET){
+        struct sockaddr_in *dbg4 = (struct sockaddr_in*)saddr;
+        fprintf(stderr, "DEBUG [endpoint]: localaddr is IPv4: %s, port: %d, server=%d, twoway=%d\n",
+                inet_ntoa(dbg4->sin_addr), ntohs(dbg4->sin_port), cntrl->server, cntrl->twoway);
+    }
+
     if( !(ep=EndpointAlloc(cntrl)))
         return False;
 
@@ -590,6 +598,11 @@ _OWPEndpointInit(
         /*
          * Try binding.
          */
+        if(saddr->sa_family == AF_INET){
+            struct sockaddr_in *b4 = (struct sockaddr_in*)saddr;
+            fprintf(stderr, "DEBUG [endpoint]: attempting bind() to %s:%d (fd=%d)\n",
+                    inet_ntoa(b4->sin_addr), ntohs(b4->sin_port), ep->sockfd);
+        }
         if(bind(ep->sockfd,saddr,saddrlen) == 0)
             goto success;
         /*
@@ -597,6 +610,8 @@ _OWPEndpointInit(
          * loop and report failure. (Or if the error is not EADDRINUSE
          * this is a permenent failure.)
          */
+        fprintf(stderr, "DEBUG [endpoint]: bind() FAILED: %s (errno=%d, EADDRINUSE=%d)\n",
+                strerror(errno), errno, EADDRINUSE);
         if(!portrange || !range || (errno != EADDRINUSE)){
             *aval = OWP_CNTRL_FAILURE;
             goto bind_fail;

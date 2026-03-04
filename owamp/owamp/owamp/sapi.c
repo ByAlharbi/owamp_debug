@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <sys/stat.h>
+#include <arpa/inet.h>
 #include <fcntl.h>
 
 
@@ -632,6 +633,26 @@ OWPProcessTestRequest(
                 "Invalid addresses from ReadTestRequest");
         err_ret = OWPErrFATAL;
         goto error;
+    }
+
+    /* DEBUG: show what the server decoded from the client's test request */
+    if(rsaddr->sa_family == AF_INET){
+        struct sockaddr_in *rs4 = (struct sockaddr_in*)rsaddr;
+        struct sockaddr_in *ss4 = (struct sockaddr_in*)ssaddr;
+        fprintf(stderr, "DEBUG [sapi]: receiver addr from TestRequest: %s:%d (conf_receiver=%d)\n",
+                inet_ntoa(rs4->sin_addr), ntohs(rs4->sin_port), tsession->conf_receiver);
+        fprintf(stderr, "DEBUG [sapi]: sender addr from TestRequest: %s:%d (conf_sender=%d)\n",
+                inet_ntoa(ss4->sin_addr), ntohs(ss4->sin_port), tsession->conf_sender);
+        {
+            struct sockaddr *local_sa;
+            socklen_t local_len;
+            local_sa = I2AddrSAddr(cntrl->local_addr, &local_len);
+            if(local_sa && local_sa->sa_family == AF_INET){
+                struct sockaddr_in *l4 = (struct sockaddr_in*)local_sa;
+                fprintf(stderr, "DEBUG [sapi]: server local_addr (control socket): %s\n",
+                        inet_ntoa(l4->sin_addr));
+            }
+        }
     }
 
     if(tsession->conf_receiver && (_OWPCreateSID(tsession) != 0)){
