@@ -612,6 +612,38 @@ _OWPEndpointInit(
          */
         fprintf(stderr, "DEBUG [endpoint]: bind() FAILED: %s (errno=%d, EADDRINUSE=%d)\n",
                 strerror(errno), errno, EADDRINUSE);
+
+        /*
+         * NAT fallback: if the requested address is not available on
+         * this host (common when behind NAT), retry bind using the
+         * control socket's local address (which is known bindable).
+         */
+        if(errno == EADDRNOTAVAIL && cntrl->server){
+            struct sockaddr *local_saddr;
+            socklen_t       local_saddrlen;
+
+            local_saddr = I2AddrSAddr(cntrl->local_addr, &local_saddrlen);
+            if(local_saddr && local_saddr->sa_family == saddr->sa_family){
+                if(saddr->sa_family == AF_INET){
+                    struct sockaddr_in *dst = (struct sockaddr_in*)saddr;
+                    struct sockaddr_in *src = (struct sockaddr_in*)local_saddr;
+                    dst->sin_addr = src->sin_addr;
+                }
+#ifdef AF_INET6
+                else if(saddr->sa_family == AF_INET6){
+                    struct sockaddr_in6 *dst = (struct sockaddr_in6*)saddr;
+                    struct sockaddr_in6 *src = (struct sockaddr_in6*)local_saddr;
+                    dst->sin6_addr = src->sin6_addr;
+                }
+#endif
+                OWPError(cntrl->ctx, OWPErrWARNING, OWPErrUNKNOWN,
+                        "bind() failed for requested address, "
+                        "retrying with local address (NAT detected)");
+                if(bind(ep->sockfd, saddr, saddrlen) == 0)
+                    goto success;
+            }
+        }
+
         if(!portrange || !range || (errno != EADDRINUSE)){
             *aval = OWP_CNTRL_FAILURE;
             goto bind_fail;
