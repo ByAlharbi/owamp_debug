@@ -307,6 +307,7 @@ typedef struct OWPEndpointRec{
     int                 wopts;
     OWPBoolean          send;
     OWPBoolean          twoway;
+    OWPBoolean          nat_detected;
     int                 sockfd;
     int                 skiprecfd;
     off_t               skiprecsize;

@@ -639,8 +639,10 @@ _OWPEndpointInit(
                 OWPError(cntrl->ctx, OWPErrWARNING, OWPErrUNKNOWN,
                         "bind() failed for requested address, "
                         "retrying with local address (NAT detected)");
-                if(bind(ep->sockfd, saddr, saddrlen) == 0)
+                if(bind(ep->sockfd, saddr, saddrlen) == 0){
+                    ep->nat_detected = True;
                     goto success;
+                }
             }
         }
 
@@ -2439,10 +2441,13 @@ again:
 
         /*
          * Verify peer before looking at packet.
+         * When NAT is detected, only check the port since the sender's
+         * IP will differ (public vs private) due to NAT translation.
          */
         if(I2SockAddrEqual(rsaddr,rsaddrlen,
                     (struct sockaddr*)&peer_addr,
-                    peer_addr_len,I2SADDR_ALL) <= 0){
+                    peer_addr_len,
+                    ep->nat_detected ? I2SADDR_PORT : I2SADDR_ALL) <= 0){
             goto again;
         }
 
@@ -2872,10 +2877,13 @@ again:
 
         /*
          * Verify peer before looking at packet.
+         * When NAT is detected, only check the port since the sender's
+         * IP will differ (public vs private) due to NAT translation.
          */
         if(I2SockAddrEqual(rsaddr,rsaddrlen,
                     (struct sockaddr*)&peer_addr,
-                    peer_addr_len,I2SADDR_ALL) <= 0){
+                    peer_addr_len,
+                    ep->nat_detected ? I2SADDR_PORT : I2SADDR_ALL) <= 0){
             goto again;
         }
 
